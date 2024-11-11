@@ -31,6 +31,13 @@ func (sdk *PostgresSDK) Close() error {
 	return nil
 }
 
+func (sdk *PostgresSDK) QueryRow(ctx context.Context, query string, args ...interface{}) pgx.Row {
+	if sdk.conn == nil {
+		return nil
+	}
+	return sdk.conn.QueryRow(ctx, query, args...)
+}
+
 func (sdk *PostgresSDK) ExecuteQuery(ctx context.Context, query string, args ...interface{}) (pgx.Rows, error) {
 	if sdk.conn == nil {
 		return nil, fmt.Errorf("not connected to the database")
