@@ -4,7 +4,8 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/jackc/pgx/v4"
+	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgconn"
 )
 
 type PostgresSDK struct {
@@ -43,6 +44,19 @@ func (sdk *PostgresSDK) ExecuteQuery(ctx context.Context, query string, args ...
 		return nil, fmt.Errorf("not connected to the database")
 	}
 	return sdk.conn.Query(ctx, query, args...)
+}
+
+// Exec ejecuta una consulta que no devuelve filas
+func (sdk *PostgresSDK) Exec(ctx context.Context, query string, args ...interface{}) (pgconn.CommandTag, error) {
+	if sdk.conn == nil {
+		return pgconn.CommandTag{}, fmt.Errorf("not connected to the database")
+	}
+	return sdk.conn.Exec(ctx, query, args...)
+}
+
+// RowsAffected obtiene el número de filas afectadas por la última operación
+func RowsAffected(result pgconn.CommandTag) int64 {
+	return result.RowsAffected()
 }
 
 func (sdk *PostgresSDK) ExecuteTransaction(ctx context.Context, fn func(tx pgx.Tx) error) error {
